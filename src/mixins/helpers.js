@@ -79,10 +79,6 @@ var helpers = {
     var targetLeft, currentLeft;
     var callback;
 
-    if (this.state.currentSlide === index) {
-      return;
-    }
-
     if (this.props.fade) {
       currentSlide = this.state.currentSlide;
 
