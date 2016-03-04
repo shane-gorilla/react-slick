@@ -79,6 +79,15 @@ var helpers = {
     var targetLeft, currentLeft;
     var callback;
 
+    if (this.props.waitForAnimate && this.state.animating) {
+      // Fix for NBC: We needed to reset the animating state here so that
+      // future calls to slideHandler() would work.
+      this.setState({
+        animating: false
+      });
+      return;
+    }
+
     if (this.props.fade) {
       currentSlide = this.state.currentSlide;
 
