@@ -5,6 +5,6 @@ $primary-color: #00558B;
 $slick-font-path: "/fonts/";
 $slick-arrow-color: $primary-color;
 
-@import "slick-carousel/slick/slick";
-@import "slick-carousel/slick/slick-theme";
+@import "slick-carousel/slick/slick.scss";
+@import "slick-carousel/slick/slick-theme.scss";
 @import "./style";

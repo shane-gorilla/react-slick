@@ -88,7 +88,9 @@ export var InnerSlider = React.createClass({
       slidesToShow: this.props.slidesToShow,
       slideCount: this.state.slideCount,
       trackStyle: this.state.trackStyle,
-      variableWidth: this.props.variableWidth
+      variableWidth: this.props.variableWidth,
+      animating: this.state.animating,
+      previousSlide: this.state.previousSlide
     };
 
     var dots;
