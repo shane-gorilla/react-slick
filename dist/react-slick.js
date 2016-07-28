@@ -289,7 +289,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	      slidesToShow: this.props.slidesToShow,
 	      slideCount: this.state.slideCount,
 	      trackStyle: this.state.trackStyle,
-	      variableWidth: this.props.variableWidth
+	      variableWidth: this.props.variableWidth,
+	      animating: this.state.animating,
+	      previousSlide: this.state.previousSlide
 	    };
 
 	    var dots;
@@ -815,8 +817,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var targetLeft, currentLeft;
 	    var callback;
 
+	    if (this.props.waitForAnimate && this.state.animating) {
+	      // Fix for NBC: We needed to reset the animating state here so that
+	      // future calls to slideHandler() would work.
+	      this.setState({
+	        animating: false
+	      });
+	      return;
+	    }
+
 	    if (this.props.fade) {
 	      currentSlide = this.state.currentSlide;
+	      this.setState({ previousSlide: currentSlide });
 
 	      //  Shifting targetSlide back into the range
 	      if (index < 0) {
@@ -833,12 +845,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	        });
 	      }
 
-	      callback = function () {
+	      callback = function (event) {
+	        if (event.elapsedTime < _this.props.speed / 1000) {
+	          return;
+	        }
 	        _this.setState({
 	          animating: false
 	        });
 	        if (_this.props.afterChange) {
-	          _this.props.afterChange(currentSlide);
+	          _this.props.afterChange(targetSlide);
 	        }
 	        _reactLibReactTransitionEvents2['default'].removeEndEventListener(_ReactDOM2['default'].findDOMNode(_this.refs.track).children[currentSlide], callback);
 	      };
@@ -851,7 +866,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      });
 
 	      if (this.props.beforeChange) {
-	        this.props.beforeChange(this.state.currentSlide, currentSlide);
+	        this.props.beforeChange(this.state.currentSlide, targetSlide);
 	      }
 
 	      this.autoPlay();
@@ -1240,7 +1255,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    useCSS: true,
 	    variableWidth: false,
 	    vertical: false,
-	    // waitForAnimate: true,
+	    waitForAnimate: false,
 	    afterChange: null,
 	    beforeChange: null,
 	    edgeEvent: null,
@@ -1352,11 +1367,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	  } else {
 	    slickActive = spec.currentSlide <= index && index < spec.currentSlide + spec.slidesToShow;
 	  }
+
 	  return (0, _classnames2['default'])({
 	    'slick-slide': true,
 	    'slick-active': slickActive,
 	    'slick-center': slickCenter,
-	    'slick-cloned': slickCloned
+	    'slick-cloned': slickCloned,
+	    'slick-exit': spec.animating && spec.previousSlide === index
 	  });
 	};
 

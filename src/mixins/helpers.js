@@ -106,7 +106,11 @@ var helpers = {
         });
       }
 
-      callback = () => {
+      callback = (event) => {
+        // Only want to stop animating after the slide has fully transitioned
+        if (event.elapsedTime < this.props.speed / 1000) {
+          return;
+        }
         this.setState({
           animating: false
         });
@@ -118,7 +122,8 @@ var helpers = {
 
       this.setState({
         animating: true,
-        currentSlide: targetSlide
+        currentSlide: targetSlide,
+        previousSlide: currentSlide
       }, function () {
         ReactTransitionEvents.addEndEventListener(ReactDOM.findDOMNode(this.refs.track).children[currentSlide], callback);
       });
