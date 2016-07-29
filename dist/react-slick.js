@@ -828,7 +828,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    if (this.props.fade) {
 	      currentSlide = this.state.currentSlide;
-	      this.setState({ previousSlide: currentSlide });
 
 	      //  Shifting targetSlide back into the range
 	      if (index < 0) {
@@ -846,6 +845,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 
 	      callback = function (event) {
+	        // Only want to stop animating after the slide has fully transitioned
 	        if (event.elapsedTime < _this.props.speed / 1000) {
 	          return;
 	        }
@@ -860,7 +860,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	      this.setState({
 	        animating: true,
-	        currentSlide: targetSlide
+	        currentSlide: targetSlide,
+	        previousSlide: currentSlide
 	      }, function () {
 	        _reactLibReactTransitionEvents2['default'].addEndEventListener(_ReactDOM2['default'].findDOMNode(this.refs.track).children[currentSlide], callback);
 	      });
