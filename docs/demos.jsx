@@ -3,6 +3,7 @@
 import React from 'react';
 import Slider from '../src/slider';
 
+import GuestCalendar from '../examples/GuestCalendar'
 import SimpleSlider from '../examples/SimpleSlider'
 import SlideChangeHooks from '../examples/SlideChangeHooks'
 import MultipleItems from '../examples/MultipleItems'
@@ -30,6 +31,7 @@ export default class App extends React.Component {
   render() {
     return (
       <div className='content'>
+        <GuestCalendar />
         <SimpleSlider />
         <MultipleItems />
         <Responsive />
