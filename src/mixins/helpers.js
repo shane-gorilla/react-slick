@@ -264,7 +264,7 @@ var helpers = {
       this.setState({
         animating: true,
         currentSlide: currentSlide,
-        trackStyle: getTrackAnimateCSS(assign({left: targetLeft}, this.props, this.state))
+        trackStyle: getTrackAnimateCSS(assign({}, this.props, this.state, {currentSlide: currentSlide, left: targetLeft}))
       }, function () {
         this.animationEndCallback = setTimeout(callback, this.props.speed);
       });

@@ -882,12 +882,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 	var getTrackAnimateCSS = exports.getTrackAnimateCSS = function getTrackAnimateCSS(spec) {
-	  checkSpecKeys(spec, ['left', 'variableWidth', 'slideCount', 'slidesToShow', 'slideWidth', 'speed', 'cssEase']);
+	  checkSpecKeys(spec, ['left', 'variableWidth', 'slideCount', 'slidesToShow', 'slideWidth', 'speed', 'cssEase', 'children', 'currentSlide']);
+
+	  var slideComponent = spec.children[spec.currentSlide];
+	  var multiplier = slideComponent && slideComponent.props['data-speed-multiplier'] || 1;
 
 	  var style = getTrackCSS(spec);
 	  // useCSS is true by default so it can be undefined
-	  style.WebkitTransition = '-webkit-transform ' + spec.speed + 'ms ' + spec.cssEase;
-	  style.transition = 'transform ' + spec.speed + 'ms ' + spec.cssEase;
+	  style.WebkitTransition = '-webkit-transform ' + spec.speed * multiplier + 'ms ' + spec.cssEase;
+	  style.transition = 'transform ' + spec.speed * multiplier + 'ms ' + spec.cssEase;
 	  return style;
 	};
 
@@ -1346,7 +1349,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      this.setState({
 	        animating: true,
 	        currentSlide: currentSlide,
-	        trackStyle: (0, _trackHelper.getTrackAnimateCSS)((0, _objectAssign2.default)({ left: targetLeft }, this.props, this.state))
+	        trackStyle: (0, _trackHelper.getTrackAnimateCSS)((0, _objectAssign2.default)({}, this.props, this.state, { currentSlide: currentSlide, left: targetLeft }))
 	      }, function () {
 	        this.animationEndCallback = setTimeout(callback, this.props.speed);
 	      });

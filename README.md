@@ -138,6 +138,23 @@ like the example above. If you don't, your custom component won't trigger the cl
 
 You can also set onClick={this.props.onClick} if you only want to set the click handler. 
 
+### Customize slide speed using speed multiplier
+```js
+class CustomSlider extends React.Component {
+  render() {
+    var settings = {
+      speed: 200
+    };
+    return (
+      <Slider {...settings}>
+        <div><h3>1</h3></div> {/* transition: transform 200ms */}
+        <div data-speed-multiplier={3}><h3>2</h3></div> {/* transition: transform 600ms */}
+      </Slider>
+    );
+  }
+}
+```
+
 ### Flexbox support 
 If you have flex property on container div of slider, add below css
 ```

@@ -60,13 +60,17 @@ export var getTrackCSS = function(spec) {
 
 export var getTrackAnimateCSS = function (spec) {
   checkSpecKeys(spec, [
-    'left', 'variableWidth', 'slideCount', 'slidesToShow', 'slideWidth', 'speed', 'cssEase'
+    'left', 'variableWidth', 'slideCount', 'slidesToShow', 'slideWidth', 'speed', 'cssEase',
+    'children', 'currentSlide'
   ]);
+
+  var slideComponent = spec.children[spec.currentSlide];
+  var multiplier = slideComponent && slideComponent.props['data-speed-multiplier'] || 1;
 
   var style = getTrackCSS(spec);
   // useCSS is true by default so it can be undefined
-  style.WebkitTransition = '-webkit-transform ' + spec.speed + 'ms ' + spec.cssEase;
-  style.transition = 'transform ' + spec.speed + 'ms ' + spec.cssEase;
+  style.WebkitTransition = '-webkit-transform ' + spec.speed * multiplier + 'ms ' + spec.cssEase;
+  style.transition = 'transform ' + spec.speed * multiplier + 'ms ' + spec.cssEase;
   return style;
 };
 
