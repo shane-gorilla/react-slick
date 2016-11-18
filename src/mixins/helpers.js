@@ -143,11 +143,7 @@ var helpers = {
         });
       }
 
-      callback = (event) => {
-        // Only want to stop animating after the slide has fully transitioned
-        if (event.elapsedTime < this.props.speed / 1000) {
-          return;
-        }
+      callback = () => {
         this.setState({
           animating: false
         });
