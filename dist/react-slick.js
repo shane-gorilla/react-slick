@@ -1347,9 +1347,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        currentSlide: currentSlide,
 	        trackStyle: (0, _trackHelper.getTrackAnimateCSS)((0, _objectAssign2.default)({}, this.props, this.state, { currentSlide: currentSlide, left: targetLeft }))
 	      }, function () {
-	        var slideComponent = this.props.children[currentSlide];
-	        var multiplier = slideComponent && slideComponent.props['data-speed-multiplier'] || 1;
-	        this.animationEndCallback = setTimeout(callback, this.props.speed * multiplier);
+	        this.animationEndCallback = setTimeout(callback, this.props.speed);
 	      });
 	    }
 
