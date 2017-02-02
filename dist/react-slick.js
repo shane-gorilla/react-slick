@@ -815,7 +815,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	'use strict';
 
 	exports.__esModule = true;
-	exports.getTrackLeft = exports.getTrackAnimateCSS = exports.getTrackCSS = undefined;
+	exports.getMultiplier = exports.getTrackLeft = exports.getTrackAnimateCSS = exports.getTrackCSS = undefined;
 
 	var _reactDom = __webpack_require__(6);
 
@@ -884,8 +884,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var getTrackAnimateCSS = exports.getTrackAnimateCSS = function getTrackAnimateCSS(spec) {
 	  checkSpecKeys(spec, ['left', 'variableWidth', 'slideCount', 'slidesToShow', 'slideWidth', 'speed', 'cssEase', 'children', 'currentSlide']);
 
-	  var slideComponent = spec.children[spec.currentSlide];
-	  var multiplier = slideComponent && slideComponent.props['data-speed-multiplier'] || 1;
+	  var multiplier = getMultiplier(spec);
 
 	  var style = getTrackCSS(spec);
 	  // useCSS is true by default so it can be undefined
@@ -969,6 +968,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 
 	  return targetLeft;
+	};
+
+	var getMultiplier = exports.getMultiplier = function getMultiplier(spec) {
+	  checkSpecKeys(spec, ['children', 'currentSlide']);
+
+	  var slideComponent = spec.children[spec.currentSlide];
+	  return slideComponent && slideComponent.props['data-speed-multiplier'] || 1;
 	};
 
 /***/ },
@@ -1229,6 +1235,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        });
 	      }
 
+	      var multiplier = (0, _trackHelper.getMultiplier)((0, _objectAssign2.default)({}, this.props, { currentSlide: currentSlide }));
+
 	      callback = function callback() {
 	        _this.setState({
 	          animating: false
@@ -1244,7 +1252,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        currentSlide: targetSlide,
 	        previousSlide: currentSlide
 	      }, function () {
-	        this.animationEndCallback = setTimeout(callback, this.props.speed);
+	        this.animationEndCallback = setTimeout(callback, this.props.speed * multiplier);
 	      });
 
 	      if (this.props.beforeChange) {
@@ -1334,6 +1342,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        swipeLeft: null
 	      };
 
+	      var multiplier = (0, _trackHelper.getMultiplier)((0, _objectAssign2.default)({}, this.props, { currentSlide: currentSlide }));
+
 	      callback = function callback() {
 	        _this.setState(nextStateChanges);
 	        if (_this.props.afterChange) {
@@ -1347,7 +1357,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        currentSlide: currentSlide,
 	        trackStyle: (0, _trackHelper.getTrackAnimateCSS)((0, _objectAssign2.default)({}, this.props, this.state, { currentSlide: currentSlide, left: targetLeft }))
 	      }, function () {
-	        this.animationEndCallback = setTimeout(callback, this.props.speed);
+	        this.animationEndCallback = setTimeout(callback, this.props.speed * multiplier);
 	      });
 	    }
 

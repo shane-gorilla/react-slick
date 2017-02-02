@@ -64,8 +64,7 @@ export var getTrackAnimateCSS = function (spec) {
     'children', 'currentSlide'
   ]);
 
-  var slideComponent = spec.children[spec.currentSlide];
-  var multiplier = slideComponent && slideComponent.props['data-speed-multiplier'] || 1;
+  var multiplier = getMultiplier(spec);
 
   var style = getTrackCSS(spec);
   // useCSS is true by default so it can be undefined
@@ -154,3 +153,12 @@ export var getTrackLeft = function (spec) {
 
   return targetLeft;
 };
+
+export var getMultiplier = function(spec) {
+  checkSpecKeys(spec, [
+    'children', 'currentSlide'
+  ]);
+
+  var slideComponent = spec.children[spec.currentSlide];
+  return slideComponent && slideComponent.props['data-speed-multiplier'] || 1;
+}

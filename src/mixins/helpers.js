@@ -2,7 +2,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import {getTrackCSS, getTrackLeft, getTrackAnimateCSS} from './trackHelper';
+import {getTrackCSS, getTrackLeft, getTrackAnimateCSS, getMultiplier} from './trackHelper';
 import assign from 'object-assign';
 
 var helpers = {
@@ -143,6 +143,8 @@ var helpers = {
         });
       }
 
+      var multiplier = getMultiplier(assign({}, this.props, {currentSlide: currentSlide}));
+
       callback = () => {
         this.setState({
           animating: false
@@ -158,7 +160,7 @@ var helpers = {
         currentSlide: targetSlide,
         previousSlide: currentSlide
       }, function () {
-        this.animationEndCallback = setTimeout(callback, this.props.speed);
+        this.animationEndCallback = setTimeout(callback, this.props.speed * multiplier);
       });
 
       if (this.props.beforeChange) {
@@ -249,6 +251,8 @@ var helpers = {
         swipeLeft: null
       };
 
+      var multiplier = getMultiplier(assign({}, this.props, {currentSlide: currentSlide}));
+
       callback = () => {
         this.setState(nextStateChanges);
         if (this.props.afterChange) {
@@ -262,7 +266,7 @@ var helpers = {
         currentSlide: currentSlide,
         trackStyle: getTrackAnimateCSS(assign({}, this.props, this.state, {currentSlide: currentSlide, left: targetLeft}))
       }, function () {
-        this.animationEndCallback = setTimeout(callback, this.props.speed);
+        this.animationEndCallback = setTimeout(callback, this.props.speed * multiplier);
       });
 
     }
