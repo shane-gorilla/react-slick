@@ -13,6 +13,7 @@ var defaultProps = {
     draggable: true,
     easing: 'linear',
     edgeFriction: 0.35,
+    endRightEdge: false,
     fade: false,
     focusOnSelect: false,
     infinite: true,

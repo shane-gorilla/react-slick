@@ -9,6 +9,7 @@ export default class GuestCalendar extends Component {
     const settings = {
       dots: true,
       infinite: false,
+      endRightEdge: true,
       speed: 50,
       ease: 'cubic-bezier(0.4,0.0,0.2,1)',
       slidesToShow: 1,
@@ -16,7 +17,7 @@ export default class GuestCalendar extends Component {
       variableWidth: true,
       dots: false,
       swipeToSlide: true,
-      initialSlide: 1 // The slide index of the previous day. 
+      initialSlide: 0 // The slide index of the previous day. 
                       // Will slide to current day when `componentDidMount`
     };
     return (
@@ -48,9 +49,26 @@ export default class GuestCalendar extends Component {
             <h3 className="guest">5</h3>
             <h3 className="guest">5</h3>
          </div>
-          <div data-speed-multiplier={2} className="day">
+          <div data-speed-multiplier={3} className="day">
             <h3 className="guest">6</h3>
             <h3 className="guest">6</h3>
+            <h3 className="guest">6</h3>
+         </div>
+         <div data-speed-multiplier={3} className="day">
+            <h3 className="guest">7</h3>
+            <h3 className="guest">7</h3>
+            <h3 className="guest">7</h3>
+         </div>
+         <div data-speed-multiplier={3} className="day">
+            <h3 className="guest">8</h3>
+            <h3 className="guest">8</h3>
+            <h3 className="guest">8</h3>
+         </div>
+         <div data-speed-multiplier={3} className="day">
+            <h3 className="guest">L</h3>
+            <h3 className="guest">A</h3>
+            <h3 className="guest">S</h3>
+            <h3 className="guest">T</h3>
          </div>
         </Slider>
       </div>

@@ -18,7 +18,10 @@ export var getTrackCSS = function(spec) {
   const trackChildren = (spec.slideCount + 2 * spec.slidesToShow);
 
   if (!spec.vertical) {
-    if (spec.variableWidth) {
+    if (spec.variableWidth && !spec.infinite) {
+      trackWidth = spec.slideCount * spec.slideWidth
+    }
+    else if (spec.variableWidth) {
       trackWidth = (spec.slideCount + 2*spec.slidesToShow) * spec.slideWidth;
     } else if (spec.centerMode) {
       trackWidth = (spec.slideCount + 2*(spec.slidesToShow + 1)) * spec.slideWidth;
@@ -76,7 +79,7 @@ export var getTrackAnimateCSS = function (spec) {
 export var getTrackLeft = function (spec) {
 
   checkSpecKeys(spec, [
-   'slideIndex', 'trackRef', 'infinite', 'centerMode', 'slideCount', 'slidesToShow',
+   'slideIndex', 'trackRef', 'listRef', 'infinite', 'centerMode', 'slideCount', 'slidesToShow',
    'slidesToScroll', 'slideWidth', 'listWidth', 'variableWidth', 'slideHeight']);
 
   var slideOffset = 0;
@@ -151,6 +154,13 @@ export var getTrackLeft = function (spec) {
       }
   }
 
+  if (spec.endRightEdge === true && !spec.centerMode && !spec.infinite) {
+    var {rightVisible, partiallyVisible, lastSlideRect, lastSlide} = getLastSlideVisibility(spec);
+    if (partiallyVisible && !rightVisible && spec.currentSlide < spec.slideIndex) {
+      targetLeft = (lastSlide.offsetLeft - (spec.listRef.clientWidth - lastSlide.clientWidth)) * -1;
+    }
+  }
+
   return targetLeft;
 };
 
@@ -161,4 +171,18 @@ export var getMultiplier = function(spec) {
 
   var slideComponent = spec.children[spec.currentSlide];
   return slideComponent && slideComponent.props['data-speed-multiplier'] || 1;
+}
+
+export var getLastSlideVisibility = function (spec) {
+  checkSpecKeys(spec, [
+    'trackRef', 'listRef', 'children'
+  ]);
+  var track = ReactDOM.findDOMNode(spec.trackRef);
+  var list = ReactDOM.findDOMNode(spec.listRef);
+  var listRect = list.getBoundingClientRect();
+  var lastSlide = track.children[track.children.length - 1];
+  var lastSlideRect = lastSlide.getBoundingClientRect();
+  var rightVisible = listRect.right >= lastSlideRect.right;
+  const partiallyVisible = (lastSlideRect.left < listRect.right) && (listRect.right < lastSlideRect.right);
+  return {rightVisible, partiallyVisible, lastSlideRect, lastSlide, listRect};
 }

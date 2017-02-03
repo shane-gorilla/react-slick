@@ -94,6 +94,7 @@ var SimpleSlider = React.createClass({
 | fade           | bool | Slides use fade for transition  | Yes |
 | focusOnSelect  | bool | Go to slide on click | Yes |
 | infinite       | bool | should the gallery wrap around it's contents | Yes |
+| endRightEdge   | bool | should the galler use right edge of last slide as limit | Partial - see Guest Calendar Example |
 | initialSlide   | int | which item should be the first to be displayed | Yes |
 | lazyLoad       | bool | Loads images or renders components on demands | Yes |
 | pauseOnHover   | bool | prevents autoplay while hovering | Yes |
