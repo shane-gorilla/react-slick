@@ -279,13 +279,12 @@ var helpers = {
     var callback;
 
     if (this.props.endRightEdge && !this.props.infinite && this.list && this.track) {
-      var {partiallyVisible, rightVisible, lastSlide, listRect} = getLastSlideVisibility(assign({listRef: this.list, trackRef: this.track}, this.props));
+      var {partiallyVisible, rightVisible, lastSlideLeft} = getLastSlideVisibility(assign({listRef: this.list, trackRef: this.track}, this.props));
       if (!partiallyVisible && rightVisible) {
-        var targetLeft = (lastSlide.offsetLeft - (listRect.width - lastSlide.clientWidth)) * -1;
         var nextStateChanges = {
           animating: false,
           currentSlide: currentSlide,
-          trackStyle: getTrackCSS(assign({left: targetLeft}, this.props, this.state)),
+          trackStyle: getTrackCSS(assign({left: lastSlideLeft}, this.props, this.state)),
           swipeLeft: null
         };
         callback = () => {
@@ -297,7 +296,7 @@ var helpers = {
         }
         this.setState({
           animating: true,
-          trackStyle: getTrackAnimateCSS(assign({left: targetLeft}, this.props, this.state))
+          trackStyle: getTrackAnimateCSS(assign({left: lastSlideLeft}, this.props, this.state))
         }, () => {
           this.animationEndCallback = setTimeout(callback, this.props.speed);
         })

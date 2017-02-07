@@ -154,10 +154,13 @@ export var getTrackLeft = function (spec) {
       }
   }
 
+  // NBC specific option - ensures the last slide is right aligned in the carousel
   if (spec.endRightEdge === true && !spec.centerMode && !spec.infinite) {
-    var {rightVisible, partiallyVisible, lastSlideRect, lastSlide} = getLastSlideVisibility(spec);
+    var {rightVisible, partiallyVisible, lastSlideLeft} = getLastSlideVisibility(spec);
+    // Since we're not at the last slideIndex, we have to do some trickery to 
+    // check the direction and whether the last slide is close to the right edge
     if (partiallyVisible && !rightVisible && spec.currentSlide < spec.slideIndex) {
-      targetLeft = (lastSlide.offsetLeft - (spec.listRef.clientWidth - lastSlide.clientWidth)) * -1;
+      targetLeft = lastSlideLeft;
     }
   }
 
@@ -184,5 +187,6 @@ export var getLastSlideVisibility = function (spec) {
   var lastSlideRect = lastSlide.getBoundingClientRect();
   var rightVisible = listRect.right >= lastSlideRect.right;
   const partiallyVisible = (lastSlideRect.left < listRect.right) && (listRect.right < lastSlideRect.right);
-  return {rightVisible, partiallyVisible, lastSlideRect, lastSlide, listRect};
+  const lastSlideLeft = (lastSlide.offsetLeft - (spec.listRef.clientWidth - lastSlide.clientWidth)) * -1;
+  return {rightVisible, partiallyVisible, lastSlideLeft};
 }

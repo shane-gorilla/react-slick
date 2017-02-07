@@ -975,15 +975,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  }
 
+	  // NBC specific option - ensures the last slide is right aligned in the carousel
 	  if (spec.endRightEdge === true && !spec.centerMode && !spec.infinite) {
 	    var _getLastSlideVisibili = getLastSlideVisibility(spec),
 	        rightVisible = _getLastSlideVisibili.rightVisible,
 	        partiallyVisible = _getLastSlideVisibili.partiallyVisible,
-	        lastSlideRect = _getLastSlideVisibili.lastSlideRect,
-	        lastSlide = _getLastSlideVisibili.lastSlide;
+	        lastSlideLeft = _getLastSlideVisibili.lastSlideLeft;
+	    // Since we're not at the last slideIndex, we have to do some trickery to 
+	    // check the direction and whether the last slide is close to the right edge
+
 
 	    if (partiallyVisible && !rightVisible && spec.currentSlide < spec.slideIndex) {
-	      targetLeft = (lastSlide.offsetLeft - (spec.listRef.clientWidth - lastSlide.clientWidth)) * -1;
+	      targetLeft = lastSlideLeft;
 	    }
 	  }
 
@@ -1006,7 +1009,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var lastSlideRect = lastSlide.getBoundingClientRect();
 	  var rightVisible = listRect.right >= lastSlideRect.right;
 	  var partiallyVisible = lastSlideRect.left < listRect.right && listRect.right < lastSlideRect.right;
-	  return { rightVisible: rightVisible, partiallyVisible: partiallyVisible, lastSlideRect: lastSlideRect, lastSlide: lastSlide, listRect: listRect };
+	  var lastSlideLeft = (lastSlide.offsetLeft - (spec.listRef.clientWidth - lastSlide.clientWidth)) * -1;
+	  return { rightVisible: rightVisible, partiallyVisible: partiallyVisible, lastSlideLeft: lastSlideLeft };
 	};
 
 /***/ },
@@ -1406,15 +1410,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var _getLastSlideVisibili = (0, _trackHelper.getLastSlideVisibility)((0, _objectAssign2.default)({ listRef: this.list, trackRef: this.track }, this.props)),
 	          partiallyVisible = _getLastSlideVisibili.partiallyVisible,
 	          rightVisible = _getLastSlideVisibili.rightVisible,
-	          lastSlide = _getLastSlideVisibili.lastSlide,
-	          listRect = _getLastSlideVisibili.listRect;
+	          lastSlideLeft = _getLastSlideVisibili.lastSlideLeft;
 
 	      if (!partiallyVisible && rightVisible) {
-	        var targetLeft = (lastSlide.offsetLeft - (listRect.width - lastSlide.clientWidth)) * -1;
 	        var nextStateChanges = {
 	          animating: false,
 	          currentSlide: currentSlide,
-	          trackStyle: (0, _trackHelper.getTrackCSS)((0, _objectAssign2.default)({ left: targetLeft }, this.props, this.state)),
+	          trackStyle: (0, _trackHelper.getTrackCSS)((0, _objectAssign2.default)({ left: lastSlideLeft }, this.props, this.state)),
 	          swipeLeft: null
 	        };
 	        callback = function callback() {
@@ -1426,7 +1428,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        };
 	        this.setState({
 	          animating: true,
-	          trackStyle: (0, _trackHelper.getTrackAnimateCSS)((0, _objectAssign2.default)({ left: targetLeft }, this.props, this.state))
+	          trackStyle: (0, _trackHelper.getTrackAnimateCSS)((0, _objectAssign2.default)({ left: lastSlideLeft }, this.props, this.state))
 	        }, function () {
 	          _this2.animationEndCallback = setTimeout(callback, _this2.props.speed);
 	        });
