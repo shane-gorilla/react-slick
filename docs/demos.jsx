@@ -32,7 +32,28 @@ export default class App extends React.Component {
     return (
       <div className='content'>
         <GuestCalendar />
-        
+        <SimpleSlider />  
+        <MultipleItems />		
+        <Responsive />		
+        <UnevenSetsInfinite />		
+        <UnevenSetsFinite />		
+        <CenterMode />		
+        <FocusOnSelect />		
+        <AutoPlay />		
+        <PauseOnHover />		
+        <Rtl />		
+        <VariableWidth />		
+        <AdaptiveHeight />		
+        <LazyLoad />		
+        <Fade />		
+        <SlideChangeHooks />		
+        <SlickGoTo />		
+        <CustomArrows />		
+        <PreviousNextMethods />		
+        <DynamicSlides />		
+        <VerticalMode />		
+        <SwipeToSlide />		
+        <VerticalSwipeToSlide />
       </div>
     );
   }
