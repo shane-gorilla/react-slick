@@ -402,11 +402,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	      infinite: this.props.infinite,
 	      centerMode: this.props.centerMode,
 	      currentSlide: this.state.currentSlide,
+	      endRightEdge: this.props.endRightEdge,
 	      slideCount: this.state.slideCount,
 	      slidesToShow: this.props.slidesToShow,
 	      prevArrow: this.props.prevArrow,
 	      nextArrow: this.props.nextArrow,
-	      clickHandler: this.changeSlide
+	      clickHandler: this.changeSlide,
+	      listRef: this.list,
+	      trackRef: this.track,
+	      children: this.props.children
 	    };
 
 	    if (this.props.arrows) {
@@ -591,7 +595,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    curLeft = (0, _trackHelper.getTrackLeft)((0, _objectAssign2.default)({
 	      slideIndex: this.state.currentSlide,
-	      trackRef: this.track
+	      trackRef: this.track,
+	      listRef: this.list
 	    }, this.props, this.state));
 	    touchObject.curX = e.touches ? e.touches[0].pageX : e.clientX;
 	    touchObject.curY = e.touches ? e.touches[0].pageY : e.clientY;
@@ -786,7 +791,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	      // Adjust the track back to it's original position.
 	      var currentLeft = (0, _trackHelper.getTrackLeft)((0, _objectAssign2.default)({
 	        slideIndex: this.state.currentSlide,
-	        trackRef: this.track
+	        trackRef: this.track,
+	        listRef: this.list
 	      }, this.props, this.state));
 
 	      this.setState({
@@ -815,7 +821,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	'use strict';
 
 	exports.__esModule = true;
-	exports.getTrackLeft = exports.getTrackAnimateCSS = exports.getTrackCSS = undefined;
+	exports.getLastSlideVisibility = exports.getMultiplier = exports.getTrackLeft = exports.getTrackAnimateCSS = exports.getTrackCSS = undefined;
 
 	var _reactDom = __webpack_require__(6);
 
@@ -841,7 +847,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var trackChildren = spec.slideCount + 2 * spec.slidesToShow;
 
 	  if (!spec.vertical) {
-	    if (spec.variableWidth) {
+	    if (spec.variableWidth && !spec.infinite) {
+	      trackWidth = spec.slideCount * spec.slideWidth;
+	    } else if (spec.variableWidth) {
 	      trackWidth = (spec.slideCount + 2 * spec.slidesToShow) * spec.slideWidth;
 	    } else if (spec.centerMode) {
 	      trackWidth = (spec.slideCount + 2 * (spec.slidesToShow + 1)) * spec.slideWidth;
@@ -884,8 +892,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var getTrackAnimateCSS = exports.getTrackAnimateCSS = function getTrackAnimateCSS(spec) {
 	  checkSpecKeys(spec, ['left', 'variableWidth', 'slideCount', 'slidesToShow', 'slideWidth', 'speed', 'cssEase', 'children', 'currentSlide']);
 
-	  var slideComponent = spec.children[spec.currentSlide];
-	  var multiplier = slideComponent && slideComponent.props['data-speed-multiplier'] || 1;
+	  var multiplier = getMultiplier(spec);
 
 	  var style = getTrackCSS(spec);
 	  // useCSS is true by default so it can be undefined
@@ -896,7 +903,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var getTrackLeft = exports.getTrackLeft = function getTrackLeft(spec) {
 
-	  checkSpecKeys(spec, ['slideIndex', 'trackRef', 'infinite', 'centerMode', 'slideCount', 'slidesToShow', 'slidesToScroll', 'slideWidth', 'listWidth', 'variableWidth', 'slideHeight']);
+	  checkSpecKeys(spec, ['slideIndex', 'trackRef', 'listRef', 'infinite', 'centerMode', 'slideCount', 'slidesToShow', 'slidesToScroll', 'slideWidth', 'listWidth', 'variableWidth', 'slideHeight']);
 
 	  var slideOffset = 0;
 	  var targetLeft;
@@ -968,7 +975,42 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  }
 
+	  // NBC specific option - ensures the last slide is right aligned in the carousel
+	  if (spec.endRightEdge === true && !spec.centerMode && !spec.infinite) {
+	    var _getLastSlideVisibili = getLastSlideVisibility(spec),
+	        rightVisible = _getLastSlideVisibili.rightVisible,
+	        partiallyVisible = _getLastSlideVisibili.partiallyVisible,
+	        lastSlideLeft = _getLastSlideVisibili.lastSlideLeft;
+	    // Since we're not at the last slideIndex, we have to do some trickery to 
+	    // check the direction and whether the last slide is close to the right edge
+
+
+	    if (partiallyVisible && !rightVisible && spec.currentSlide < spec.slideIndex) {
+	      targetLeft = lastSlideLeft;
+	    }
+	  }
+
 	  return targetLeft;
+	};
+
+	var getMultiplier = exports.getMultiplier = function getMultiplier(spec) {
+	  checkSpecKeys(spec, ['children', 'currentSlide']);
+
+	  var slideComponent = spec.children[spec.currentSlide];
+	  return slideComponent && slideComponent.props['data-speed-multiplier'] || 1;
+	};
+
+	var getLastSlideVisibility = exports.getLastSlideVisibility = function getLastSlideVisibility(spec) {
+	  checkSpecKeys(spec, ['trackRef', 'listRef', 'children']);
+	  var track = _reactDom2.default.findDOMNode(spec.trackRef);
+	  var list = _reactDom2.default.findDOMNode(spec.listRef);
+	  var listRect = list.getBoundingClientRect();
+	  var lastSlide = track.children[track.children.length - 1];
+	  var lastSlideRect = lastSlide.getBoundingClientRect();
+	  var rightVisible = listRect.right >= lastSlideRect.right;
+	  var partiallyVisible = lastSlideRect.left < listRect.right && listRect.right < lastSlideRect.right;
+	  var lastSlideLeft = (lastSlide.offsetLeft - (spec.listRef.clientWidth - lastSlide.clientWidth)) * -1;
+	  return { rightVisible: rightVisible, partiallyVisible: partiallyVisible, lastSlideLeft: lastSlideLeft };
 	};
 
 /***/ },
@@ -1122,7 +1164,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	      var targetLeft = (0, _trackHelper.getTrackLeft)((0, _objectAssign2.default)({
 	        slideIndex: this.state.currentSlide,
-	        trackRef: this.track
+	        trackRef: this.track,
+	        listRef: this.list
 	      }, props, this.state));
 	      // getCSS function needs previously set state
 	      var trackStyle = (0, _trackHelper.getTrackCSS)((0, _objectAssign2.default)({ left: targetLeft }, props, this.state));
@@ -1164,7 +1207,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	      var targetLeft = (0, _trackHelper.getTrackLeft)((0, _objectAssign2.default)({
 	        slideIndex: this.state.currentSlide,
-	        trackRef: this.track
+	        trackRef: this.track,
+	        listRef: this.list
 	      }, props, this.state));
 	      // getCSS function needs previously set state
 	      var trackStyle = (0, _trackHelper.getTrackCSS)((0, _objectAssign2.default)({ left: targetLeft }, props, this.state));
@@ -1196,6 +1240,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var targetSlide, currentSlide;
 	    var targetLeft, currentLeft;
 	    var callback;
+	    var previousSlide = this.state.currentSlide;
 
 	    if (this.props.waitForAnimate && this.state.animating) {
 	      // Fix for NBC: We needed to reset the animating state here so that
@@ -1229,22 +1274,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	        });
 	      }
 
+	      var multiplier = (0, _trackHelper.getMultiplier)((0, _objectAssign2.default)({}, this.props, { currentSlide: currentSlide }));
+
 	      callback = function callback() {
 	        _this.setState({
 	          animating: false
 	        });
-	        if (_this.props.afterChange) {
-	          _this.props.afterChange(targetSlide);
-	        }
+	        _this.afterChange(_this.state.previousSlide, _this.state.currentSlide);
 	        delete _this.animationEndCallback;
 	      };
 
 	      this.setState({
 	        animating: true,
 	        currentSlide: targetSlide,
-	        previousSlide: currentSlide
+	        previousSlide: previousSlide
 	      }, function () {
-	        this.animationEndCallback = setTimeout(callback, this.props.speed);
+	        this.animationEndCallback = setTimeout(callback, this.props.speed * multiplier);
 	      });
 
 	      if (this.props.beforeChange) {
@@ -1278,12 +1323,14 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    targetLeft = (0, _trackHelper.getTrackLeft)((0, _objectAssign2.default)({
 	      slideIndex: targetSlide,
-	      trackRef: this.track
+	      trackRef: this.track,
+	      listRef: this.list
 	    }, this.props, this.state));
 
 	    currentLeft = (0, _trackHelper.getTrackLeft)((0, _objectAssign2.default)({
 	      slideIndex: currentSlide,
-	      trackRef: this.track
+	      trackRef: this.track,
+	      listRef: this.list
 	    }, this.props, this.state));
 
 	    if (this.props.infinite === false) {
@@ -1334,24 +1381,67 @@ return /******/ (function(modules) { // webpackBootstrap
 	        swipeLeft: null
 	      };
 
+	      var multiplier = (0, _trackHelper.getMultiplier)((0, _objectAssign2.default)({}, this.props, { currentSlide: currentSlide }));
+
 	      callback = function callback() {
 	        _this.setState(nextStateChanges);
-	        if (_this.props.afterChange) {
-	          _this.props.afterChange(currentSlide);
-	        }
+	        _this.afterChange(_this.state.previousSlide, currentSlide);
 	        delete _this.animationEndCallback;
 	      };
 
 	      this.setState({
 	        animating: true,
+	        previousSlide: previousSlide,
 	        currentSlide: currentSlide,
 	        trackStyle: (0, _trackHelper.getTrackAnimateCSS)((0, _objectAssign2.default)({}, this.props, this.state, { currentSlide: currentSlide, left: targetLeft }))
 	      }, function () {
-	        this.animationEndCallback = setTimeout(callback, this.props.speed);
+	        this.animationEndCallback = setTimeout(callback, this.props.speed * multiplier);
 	      });
 	    }
 
 	    this.autoPlay();
+	  },
+	  afterChange: function afterChange(previousSlide, currentSlide) {
+	    var _this2 = this;
+
+	    var callback;
+
+	    if (this.props.endRightEdge && !this.props.infinite && this.list && this.track) {
+	      var _getLastSlideVisibili = (0, _trackHelper.getLastSlideVisibility)((0, _objectAssign2.default)({ listRef: this.list, trackRef: this.track }, this.props)),
+	          partiallyVisible = _getLastSlideVisibili.partiallyVisible,
+	          rightVisible = _getLastSlideVisibili.rightVisible,
+	          lastSlideLeft = _getLastSlideVisibili.lastSlideLeft;
+
+	      if (!partiallyVisible && rightVisible) {
+	        var nextStateChanges = {
+	          animating: false,
+	          currentSlide: currentSlide,
+	          trackStyle: (0, _trackHelper.getTrackCSS)((0, _objectAssign2.default)({ left: lastSlideLeft }, this.props, this.state)),
+	          swipeLeft: null
+	        };
+	        callback = function callback() {
+	          _this2.setState(nextStateChanges);
+	          if (_this2.props.afterChange) {
+	            _this2.props.afterChange(currentSlide);
+	          }
+	          delete _this2.animationEndCallback;
+	        };
+	        this.setState({
+	          animating: true,
+	          trackStyle: (0, _trackHelper.getTrackAnimateCSS)((0, _objectAssign2.default)({ left: lastSlideLeft }, this.props, this.state))
+	        }, function () {
+	          _this2.animationEndCallback = setTimeout(callback, _this2.props.speed);
+	        });
+	      } else {
+	        if (this.props.afterChange) {
+	          this.props.afterChange(currentSlide);
+	        }
+	      }
+	    } else {
+	      if (this.props.afterChange) {
+	        this.props.afterChange(currentSlide);
+	      }
+	    }
 	  },
 	  swipeDirection: function swipeDirection(touchObject) {
 	    var xDist, yDist, r, swipeAngle;
@@ -1381,15 +1471,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return 'vertical';
 	  },
 	  autoPlay: function autoPlay() {
-	    var _this2 = this;
+	    var _this3 = this;
 
 	    if (this.state.autoPlayTimer) {
 	      return;
 	    }
 	    var play = function play() {
-	      if (_this2.state.mounted) {
-	        var nextIndex = _this2.props.rtl ? _this2.state.currentSlide - _this2.props.slidesToScroll : _this2.state.currentSlide + _this2.props.slidesToScroll;
-	        _this2.slideHandler(nextIndex);
+	      if (_this3.state.mounted) {
+	        var nextIndex = _this3.props.rtl ? _this3.state.currentSlide - _this3.props.slidesToScroll : _this3.state.currentSlide + _this3.props.slidesToScroll;
+	        _this3.slideHandler(nextIndex);
 	      }
 	    };
 	    if (this.props.autoplay) {
@@ -1482,6 +1572,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    draggable: true,
 	    easing: 'linear',
 	    edgeFriction: 0.35,
+	    endRightEdge: false,
 	    fade: false,
 	    focusOnSelect: false,
 	    infinite: true,
@@ -1838,6 +1929,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _classnames2 = _interopRequireDefault(_classnames);
 
+	var _trackHelper = __webpack_require__(5);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	var PrevArrow = exports.PrevArrow = _react2.default.createClass({
@@ -1884,6 +1977,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var NextArrow = exports.NextArrow = _react2.default.createClass({
 	  displayName: 'NextArrow',
+	  getInitialState: function getInitialState() {
+	    return { disabled: false };
+	  },
 
 	  clickHandler: function clickHandler(options, e) {
 	    if (e) {
@@ -1891,6 +1987,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	    this.props.clickHandler(options, e);
 	  },
+	  componentWillReceiveProps: function componentWillReceiveProps() {
+	    if (this.props.listRef && this.props.endRightEdge && !this.props.infinite) {
+	      var _getLastSlideVisibili = (0, _trackHelper.getLastSlideVisibility)(this.props),
+	          rightVisible = _getLastSlideVisibili.rightVisible;
+
+	      if (rightVisible) {
+	        this.setState({ disabled: rightVisible });
+	      } else {
+	        this.setState({ disabled: false });
+	      }
+	    }
+	  },
+
 	  render: function render() {
 	    var nextClasses = { 'slick-arrow': true, 'slick-next': true };
 	    var nextHandler = this.clickHandler.bind(this, { message: 'next' });
@@ -1904,7 +2013,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	      } else {
 	        // check if all slides are shown in slider
-	        if (this.props.slideCount <= this.props.slidesToShow || this.props.currentSlide >= this.props.slideCount - this.props.slidesToShow) {
+	        if (this.props.slideCount <= this.props.slidesToShow || this.props.currentSlide >= this.props.slideCount - this.props.slidesToShow || this.state.disabled) {
 	          nextClasses['slick-disabled'] = true;
 	          nextHandler = null;
 	        }

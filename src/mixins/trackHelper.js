@@ -18,7 +18,10 @@ export var getTrackCSS = function(spec) {
   const trackChildren = (spec.slideCount + 2 * spec.slidesToShow);
 
   if (!spec.vertical) {
-    if (spec.variableWidth) {
+    if (spec.variableWidth && !spec.infinite) {
+      trackWidth = spec.slideCount * spec.slideWidth
+    }
+    else if (spec.variableWidth) {
       trackWidth = (spec.slideCount + 2*spec.slidesToShow) * spec.slideWidth;
     } else if (spec.centerMode) {
       trackWidth = (spec.slideCount + 2*(spec.slidesToShow + 1)) * spec.slideWidth;
@@ -64,8 +67,7 @@ export var getTrackAnimateCSS = function (spec) {
     'children', 'currentSlide'
   ]);
 
-  var slideComponent = spec.children[spec.currentSlide];
-  var multiplier = slideComponent && slideComponent.props['data-speed-multiplier'] || 1;
+  var multiplier = getMultiplier(spec);
 
   var style = getTrackCSS(spec);
   // useCSS is true by default so it can be undefined
@@ -77,7 +79,7 @@ export var getTrackAnimateCSS = function (spec) {
 export var getTrackLeft = function (spec) {
 
   checkSpecKeys(spec, [
-   'slideIndex', 'trackRef', 'infinite', 'centerMode', 'slideCount', 'slidesToShow',
+   'slideIndex', 'trackRef', 'listRef', 'infinite', 'centerMode', 'slideCount', 'slidesToShow',
    'slidesToScroll', 'slideWidth', 'listWidth', 'variableWidth', 'slideHeight']);
 
   var slideOffset = 0;
@@ -152,5 +154,39 @@ export var getTrackLeft = function (spec) {
       }
   }
 
+  // NBC specific option - ensures the last slide is right aligned in the carousel
+  if (spec.endRightEdge === true && !spec.centerMode && !spec.infinite) {
+    var {rightVisible, partiallyVisible, lastSlideLeft} = getLastSlideVisibility(spec);
+    // Since we're not at the last slideIndex, we have to do some trickery to 
+    // check the direction and whether the last slide is close to the right edge
+    if (partiallyVisible && !rightVisible && spec.currentSlide < spec.slideIndex) {
+      targetLeft = lastSlideLeft;
+    }
+  }
+
   return targetLeft;
 };
+
+export var getMultiplier = function(spec) {
+  checkSpecKeys(spec, [
+    'children', 'currentSlide'
+  ]);
+
+  var slideComponent = spec.children[spec.currentSlide];
+  return slideComponent && slideComponent.props['data-speed-multiplier'] || 1;
+}
+
+export var getLastSlideVisibility = function (spec) {
+  checkSpecKeys(spec, [
+    'trackRef', 'listRef', 'children'
+  ]);
+  var track = ReactDOM.findDOMNode(spec.trackRef);
+  var list = ReactDOM.findDOMNode(spec.listRef);
+  var listRect = list.getBoundingClientRect();
+  var lastSlide = track.children[track.children.length - 1];
+  var lastSlideRect = lastSlide.getBoundingClientRect();
+  var rightVisible = listRect.right >= lastSlideRect.right;
+  const partiallyVisible = (lastSlideRect.left < listRect.right) && (listRect.right < lastSlideRect.right);
+  const lastSlideLeft = (lastSlide.offsetLeft - (spec.listRef.clientWidth - lastSlide.clientWidth)) * -1;
+  return {rightVisible, partiallyVisible, lastSlideLeft};
+}

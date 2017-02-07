@@ -169,11 +169,15 @@ export var InnerSlider = React.createClass({
       infinite: this.props.infinite,
       centerMode: this.props.centerMode,
       currentSlide: this.state.currentSlide,
+      endRightEdge: this.props.endRightEdge,
       slideCount: this.state.slideCount,
       slidesToShow: this.props.slidesToShow,
       prevArrow: this.props.prevArrow,
       nextArrow: this.props.nextArrow,
-      clickHandler: this.changeSlide
+      clickHandler: this.changeSlide,
+      listRef: this.list,
+      trackRef: this.track,
+      children: this.props.children,
     };
 
     if (this.props.arrows) {

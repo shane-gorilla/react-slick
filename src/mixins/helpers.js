@@ -2,7 +2,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import {getTrackCSS, getTrackLeft, getTrackAnimateCSS} from './trackHelper';
+import {getTrackCSS, getTrackLeft, getTrackAnimateCSS, getMultiplier, getLastSlideVisibility} from './trackHelper';
 import assign from 'object-assign';
 
 var helpers = {
@@ -37,7 +37,8 @@ var helpers = {
 
       var targetLeft = getTrackLeft(assign({
         slideIndex: this.state.currentSlide,
-        trackRef: this.track
+        trackRef: this.track,
+        listRef: this.list,
       }, props, this.state));
       // getCSS function needs previously set state
       var trackStyle = getTrackCSS(assign({left: targetLeft}, props, this.state));
@@ -80,7 +81,8 @@ var helpers = {
 
       var targetLeft = getTrackLeft(assign({
         slideIndex: this.state.currentSlide,
-        trackRef: this.track
+        trackRef: this.track,
+        listRef: this.list,
       }, props, this.state));
       // getCSS function needs previously set state
       var trackStyle = getTrackCSS(assign({left: targetLeft}, props, this.state));
@@ -109,6 +111,7 @@ var helpers = {
     var targetSlide, currentSlide;
     var targetLeft, currentLeft;
     var callback;
+    var previousSlide = this.state.currentSlide;
 
     if (this.props.waitForAnimate && this.state.animating) {
       // Fix for NBC: We needed to reset the animating state here so that
@@ -143,22 +146,22 @@ var helpers = {
         });
       }
 
+      var multiplier = getMultiplier(assign({}, this.props, {currentSlide: currentSlide}));
+
       callback = () => {
         this.setState({
           animating: false
         });
-        if (this.props.afterChange) {
-          this.props.afterChange(targetSlide);
-        }
+        this.afterChange(this.state.previousSlide, this.state.currentSlide);
         delete this.animationEndCallback;
       };
 
       this.setState({
         animating: true,
         currentSlide: targetSlide,
-        previousSlide: currentSlide
+        previousSlide,
       }, function () {
-        this.animationEndCallback = setTimeout(callback, this.props.speed);
+        this.animationEndCallback = setTimeout(callback, this.props.speed * multiplier);
       });
 
       if (this.props.beforeChange) {
@@ -192,12 +195,14 @@ var helpers = {
 
     targetLeft = getTrackLeft(assign({
       slideIndex: targetSlide,
-      trackRef: this.track
+      trackRef: this.track,
+      listRef: this.list,
     }, this.props, this.state));
 
     currentLeft = getTrackLeft(assign({
       slideIndex: currentSlide,
-      trackRef: this.track
+      trackRef: this.track,
+      listRef: this.list,
     }, this.props, this.state));
 
     if (this.props.infinite === false) {
@@ -249,25 +254,64 @@ var helpers = {
         swipeLeft: null
       };
 
+      var multiplier = getMultiplier(assign({}, this.props, {currentSlide: currentSlide}));
+
       callback = () => {
         this.setState(nextStateChanges);
-        if (this.props.afterChange) {
-          this.props.afterChange(currentSlide);
-        }
+        this.afterChange(this.state.previousSlide, currentSlide);
         delete this.animationEndCallback;
       };
 
       this.setState({
         animating: true,
-        currentSlide: currentSlide,
+        previousSlide,
+        currentSlide,
         trackStyle: getTrackAnimateCSS(assign({}, this.props, this.state, {currentSlide: currentSlide, left: targetLeft}))
       }, function () {
-        this.animationEndCallback = setTimeout(callback, this.props.speed);
+        this.animationEndCallback = setTimeout(callback, this.props.speed * multiplier);
       });
 
     }
 
     this.autoPlay();
+  },
+  afterChange: function (previousSlide, currentSlide) {
+    var callback;
+
+    if (this.props.endRightEdge && !this.props.infinite && this.list && this.track) {
+      var {partiallyVisible, rightVisible, lastSlideLeft} = getLastSlideVisibility(assign({listRef: this.list, trackRef: this.track}, this.props));
+      if (!partiallyVisible && rightVisible) {
+        var nextStateChanges = {
+          animating: false,
+          currentSlide: currentSlide,
+          trackStyle: getTrackCSS(assign({left: lastSlideLeft}, this.props, this.state)),
+          swipeLeft: null
+        };
+        callback = () => {
+          this.setState(nextStateChanges);
+          if (this.props.afterChange) {
+            this.props.afterChange(currentSlide);
+          }
+          delete this.animationEndCallback;
+        }
+        this.setState({
+          animating: true,
+          trackStyle: getTrackAnimateCSS(assign({left: lastSlideLeft}, this.props, this.state))
+        }, () => {
+          this.animationEndCallback = setTimeout(callback, this.props.speed);
+        })
+      }
+      else {
+        if (this.props.afterChange) {
+          this.props.afterChange(currentSlide);
+        }
+      }
+    }
+    else {
+      if (this.props.afterChange) {
+        this.props.afterChange(currentSlide);
+      }
+    }
   },
   swipeDirection: function (touchObject) {
     var xDist, yDist, r, swipeAngle;

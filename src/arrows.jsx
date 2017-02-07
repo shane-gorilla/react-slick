@@ -2,6 +2,7 @@
 
 import React from 'react';
 import classnames from 'classnames';
+import {getLastSlideVisibility} from './mixins/trackHelper';
 
 export var PrevArrow = React.createClass({
 
@@ -39,9 +40,23 @@ export var PrevArrow = React.createClass({
 
 
 export var NextArrow = React.createClass({
+  getInitialState() {
+    return { disabled: false };
+  },
   clickHandler: function (options, e) {
     if (e) { e.preventDefault(); }
     this.props.clickHandler(options, e);
+  },
+  componentWillReceiveProps() {
+    if (this.props.listRef && this.props.endRightEdge && !this.props.infinite) {
+      var {rightVisible} = getLastSlideVisibility(this.props);
+      if (rightVisible) {
+        this.setState({ disabled: rightVisible });
+      } 
+      else {
+        this.setState({ disabled: false })
+      }
+    } 
   },
   render: function () {
     var nextClasses = {'slick-arrow': true, 'slick-next': true};
@@ -57,7 +72,8 @@ export var NextArrow = React.createClass({
       } else {
         // check if all slides are shown in slider
         if (this.props.slideCount <= this.props.slidesToShow ||
-          this.props.currentSlide >= (this.props.slideCount - this.props.slidesToShow)) {
+          this.props.currentSlide >= (this.props.slideCount - this.props.slidesToShow) ||
+          this.state.disabled) {
           nextClasses['slick-disabled'] = true;
           nextHandler = null;
         }
